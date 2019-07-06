@@ -1218,7 +1218,6 @@ using MatchingEnginePtr = std::shared_ptr<MatchingEngine>;
 // void handle(ModifyOrder)
 // void handle(PrintBook)
 // void handle(ClearBook)
-#define STATIC_DISPATCH(T, FUNC, ...) (static_cast<T *>(this)->T::FUNC(__VA_ARGS__))
 
 template <typename Derived_T>
 class CommandProcessor_T
@@ -1283,7 +1282,7 @@ protected:
         {
             throw std::invalid_argument{"Skipping invalid message"};
         }
-        STATIC_DISPATCH(Derived_T, handle, msg);
+        static_cast<Derived_T *>(this)->Derived_T::handle(msg);
     }
 
 private:
@@ -1521,7 +1520,7 @@ void run_all_tests();
 int
 main(int argc, char * argv[])
 {
-    if (argc > 1 and std::string{argv[1]} == "run-tests")
+    if (argc > 1 and std::string{argv[1]} == "--run-tests")
     {
         run_all_tests();
         return EXIT_SUCCESS;
@@ -1529,44 +1528,49 @@ main(int argc, char * argv[])
 
     auto book = std::make_shared<Book>();
     auto matching_engine = std::make_shared<MatchingEngine>(book);
-    CommandProcessor cmd_processor{matching_engine, std::cout};
-    //CommandWriter cmd_processor{std::cout};
-    cmd_processor.run(std::cin);
-    //run_test(matching_engine);
-
-    /*
-    auto task_queue = std::make_shared<TaskQueue>();
-    std::atomic<bool> is_producer_done{false};
-    QueueingCommandProcessor cmd_processor{task_queue, matching_engine, std::cout};
-    std::thread producer{
-        [&cmd_processor, &is_producer_done]()
-        {
-            cmd_processor.run(std::cin);
-            is_producer_done.store(true);
-        }};
-
-    std::thread consumer{
-        [task_queue, &is_producer_done]()
-        {
-            Task task{};
-
-            // Execute tasks while producer is running.
-            while (not is_producer_done)
+    if (argc > 1 and std::string{argv[1]} == "--run-threads")
+    {
+        // Run with multiple threads.
+        auto task_queue = std::make_shared<TaskQueue>();
+        std::atomic<bool> is_producer_done{false};
+        QueueingCommandProcessor cmd_processor{task_queue, matching_engine, std::cout};
+        std::thread producer{
+            [&cmd_processor, &is_producer_done]()
             {
-                task_queue->wait_and_pop(task);
-                task();
-            }
+                cmd_processor.run(std::cin);
+                is_producer_done.store(true);
+            }};
 
-            // Execute remaining tasks after producer is done.
-            while (task_queue->try_pop(task))
+        std::thread consumer{
+            [task_queue, &is_producer_done]()
             {
-                task();
-            }
-        }};
+                Task task{};
 
-    producer.join();
-    consumer.join();
-    */
+                // Execute tasks while producer is running.
+                while (not is_producer_done)
+                {
+                    task_queue->wait_and_pop(task);
+                    task();
+                }
+
+                // Execute remaining tasks after producer is done.
+                while (task_queue->try_pop(task))
+                {
+                    task();
+                }
+            }};
+
+        producer.join();
+        consumer.join();
+    }
+    else
+    {
+        // Single threaded.
+        CommandProcessor cmd_processor{matching_engine, std::cout};
+        //CommandWriter cmd_processor{std::cout};
+        cmd_processor.run(std::cin);
+        //run_test(matching_engine);
+    }
 
     return EXIT_SUCCESS;
 }
