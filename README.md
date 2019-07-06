@@ -6,6 +6,8 @@ Miniature stock market matching engine
 * Maintains limit order book
 * Implements FIFO matching algorithm
 * Processes commands from stdin
+* Includes unit tests with simple built-in framework
+* Optional multi-threading with thread-safe queue for producer-consumer
 
 Commands:
 * BUY - Place buy order - BUY GFD|IOC price qty order_id
