@@ -18,6 +18,6 @@ Commands:
 # Build and Run
 $ ./run.sh # Compile and run with cmd.txt as input
 
-$ ./a.out --run-tests # Run unit tests
+$ ./mini-match --run-tests # Run unit tests
 
-$ ./a.out --run-threads # Run with multiple tests
+$ ./mini-match --run-threads # Run with multiple tests
