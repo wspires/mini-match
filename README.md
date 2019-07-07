@@ -22,4 +22,4 @@ $ ./run.sh # Compile and run with cmd.txt as input
 
 $ ./mini-match --run-tests # Run unit tests
 
-$ ./mini-match --run-threads # Run with multiple tests
+$ ./mini-match --run-threads # Run with multiple threads
