@@ -358,7 +358,7 @@ struct hash<OrderID>
 {
     std::size_t operator()(OrderID const & order_id) const
     {
-        return std::hash<OrderID::value_type>()(static_cast<OrderID::value_type>(order_id.value()));
+        return std::hash<OrderID::value_type>{}(order_id.value());
     }
 };
 
