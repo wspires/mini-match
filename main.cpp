@@ -633,6 +633,9 @@ public:
         // Note: No elements are copied or moved, only the internal pointers of the list nodes are re-pointed, and
         // no iterators become invalidated.
         orders_.splice(orders_.end(), orders_, order.iterator_);
+
+        auto iter = --orders_.end();
+        iter->iterator_ = iter;
     }
 
     // Modify order qty. The order keeps its position in the queue.
